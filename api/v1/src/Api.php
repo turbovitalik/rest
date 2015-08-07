@@ -2,15 +2,9 @@
 
 namespace Rest;
 
-use \Rest\controllers\AddressController;
-
 class Api
 {
-	protected $root = '/api/v1/';
-
 	protected $method;
-
-	protected $resource;
 
 	protected $param;
 
@@ -27,57 +21,60 @@ class Api
 
 	public function handle()
 	{	
-		$this->resource = str_replace($this->root, '', $_SERVER['REQUEST_URI']);
-		$this->resource = str_replace('?', '', $this->resource);     
-
 		$this->method = $this->getMethod();
-
 		if ($this->method == 'POST' || $this->method == 'PUT') {
 			$this->data = $this->getData();
 		}
 
-        $controller = new AddressController();
+        $parts = explode('/', $_SERVER['REQUEST_URI']);
+		$controllerName = strtolower($parts[1]);
 
-        try {
+        if (isset($parts[2])) {
+        	$this->param = $parts[2];
+        }
 
-            if (!preg_match('|^/addresses\/?(\d*)?\/?$|', $this->resource, $match)) {
-        	    throw new ApiException(400);
-            }
+		$controllerClass = ucfirst($controllerName) . 'Controller';
 
-            $this->param = $match[1];
+		if (file_exists(__DIR__ . '/controllers/' . $controllerClass . '.php')) {
+			$controllerClass = '\\Rest\\controllers\\' . $controllerClass;
+			$controller = new $controllerClass; 
 
-        	switch ($this->method) {
-        		case 'GET':
-        		    $result = $controller->view($this->param);
-        		    $this->sendResponseData($result);
-        		    break;
-       
-        		case 'POST':
-        		    if (!$this->data) {
-        		    	throw new ApiException(400, "Data for creating isn't set!");
-        		    }
-        		    if ($this->param) {
-        		    	throw new ApiException(400);
-        		    }
-        		    $result = $controller->create($this->data);
-        		    $this->setStatus(201);
-        		    $this->sendResponseData(array('success' => 1));
-        		    break;
-        		
-        		case 'PUT':
-        		    if (!$this->data || !$this->param) {
-        		    	throw new ApiException(400, "Data for updating isn't set!");
-        		    }
-        		    $result = $controller->update($this->param, $this->data);
-        		    $this->setStatus(200);
-        		    $this->sendResponseData(array('success' => 1));
-        		    break; 
-        	}
-        } catch (Exception $e) {
-            echo "{$e->getMessage()}";
-        } catch (ApiException $e) {
-        	$this->handleError($e->getCode(), $e->getMessage());
-        }    
+			try {
+
+				switch ($this->method) {
+					case 'GET':
+					    $result = $controller->view($this->param);
+					    $this->sendResponseData($result);
+					    break;
+			
+					case 'POST':
+					    if (!$this->data) {
+					    	throw new ApiException(400, "Data for creating isn't set!");
+					    }
+					    if ($this->param) {
+					    	throw new ApiException(400);
+					    }
+					    $result = $controller->create($this->data);
+					    $this->setStatus(201);
+					    $this->sendResponseData(array('success' => 1));
+					    break;
+					
+					case 'PUT':
+					    if (!$this->data || !$this->param) {
+					    	throw new ApiException(400, "Data for updating isn't set!");
+					    }
+					    $result = $controller->update($this->param, $this->data);
+					    $this->setStatus(200);
+					    $this->sendResponseData(array('success' => 1));
+					    break; 
+				}
+			} catch (ApiException $e) {
+				$this->handleError($e->getCode(), $e->getMessage());
+			}        
+
+		} else {
+			$this->setStatus(404);
+		}
 	}
 
 	public function handleError($code, $errorMessage = null)
@@ -86,6 +83,14 @@ class Api
 
 		$this->setStatus($code);
 		$this->sendResponseData(array('error' => array('code' => $code, 'message' => $message)));
+	}
+
+	public function getControllerName()
+	{
+		$parts = explode('/', $_SERVER['REQUEST_URI']);
+        $controller = strtolower($parts[1]);
+		
+		return $controller;
 	}
 
 	public function getData()

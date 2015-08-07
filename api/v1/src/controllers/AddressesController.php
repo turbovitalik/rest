@@ -5,7 +5,7 @@ namespace Rest\controllers;
 use \Rest\models\AddressRepository;
 use \Rest\models\Address;
 
-class AddressController
+class AddressesController
 {
     /**
      * Get addresses list or address info by id
