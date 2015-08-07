@@ -19,62 +19,72 @@ class Api
 		'500' => 'Internal Server Error'
 	);
 
+    public function run()
+    {
+        try {
+            $this->handle();
+        } catch (ApiException $e) {
+            $this->handleError($e->getCode(), $e->getMessage());
+        }
+    }
+
 	public function handle()
-	{	
-		$this->method = $this->getMethod();
-		if ($this->method == 'POST' || $this->method == 'PUT') {
-			$this->data = $this->getData();
-		}
-
-        $parts = explode('/', $_SERVER['REQUEST_URI']);
-		$controllerName = strtolower($parts[1]);
-
-        if (isset($parts[2])) {
-        	$this->param = $parts[2];
+	{
+        $this->method = $this->getMethod();
+        if ($this->method == 'POST' || $this->method == 'PUT') {
+            $this->data = $this->getData();
+            if (!$this->data) {
+                throw new ApiException(400, "Request body isn't correct");
+            }
         }
 
-		$controllerClass = ucfirst($controllerName) . 'Controller';
+        $parts = explode('/', $_SERVER['REQUEST_URI']);
+        $controllerName = strtolower($parts[1]);
 
-		if (file_exists(__DIR__ . '/controllers/' . $controllerClass . '.php')) {
-			$controllerClass = '\\Rest\\controllers\\' . $controllerClass;
-			$controller = new $controllerClass; 
+        if (isset($parts[2])) {
+            $this->param = $parts[2];
 
-			try {
+            // For PHPStorm Test Rest API Tool
+            $this->param = str_replace('?', '', $this->param);
+        }
 
-				switch ($this->method) {
-					case 'GET':
-					    $result = $controller->view($this->param);
-					    $this->sendResponseData($result);
-					    break;
-			
-					case 'POST':
-					    if (!$this->data) {
-					    	throw new ApiException(400, "Data for creating isn't set!");
-					    }
-					    if ($this->param) {
-					    	throw new ApiException(400);
-					    }
-					    $result = $controller->create($this->data);
-					    $this->setStatus(201);
-					    $this->sendResponseData(array('success' => 1));
-					    break;
-					
-					case 'PUT':
-					    if (!$this->data || !$this->param) {
-					    	throw new ApiException(400, "Data for updating isn't set!");
-					    }
-					    $result = $controller->update($this->param, $this->data);
-					    $this->setStatus(200);
-					    $this->sendResponseData(array('success' => 1));
-					    break; 
-				}
-			} catch (ApiException $e) {
-				$this->handleError($e->getCode(), $e->getMessage());
-			}        
+        $controllerClass = ucfirst($controllerName) . 'Controller';
 
-		} else {
-			$this->setStatus(404);
-		}
+        if (file_exists(__DIR__ . '/controllers/' . $controllerClass . '.php')) {
+            $controllerClass = '\\Rest\\controllers\\' . $controllerClass;
+            $controller = new $controllerClass;
+
+            switch ($this->method) {
+                case 'GET':
+                    $result = $controller->view($this->param);
+                    $this->sendResponseData($result);
+                    break;
+
+                case 'POST':
+                    if (!$this->data) {
+                        throw new ApiException(400, "Data for creating isn't set!");
+                    }
+                    if ($this->param) {
+                        throw new ApiException(400);
+                    }
+                    $result = $controller->create($this->data);
+                    $this->setStatus(201);
+                    $this->sendResponseData(array('success' => 1));
+                    break;
+
+                case 'PUT':
+                    if (!$this->data || !$this->param) {
+                        throw new ApiException(400, "Data for updating isn't set!");
+                    }
+                    $result = $controller->update($this->param, $this->data);
+                    $this->setStatus(200);
+                    $this->sendResponseData(array('success' => 1));
+                    break;
+            }
+
+        } else {
+            $this->setStatus(404);
+        }
 	}
 
 	public function handleError($code, $errorMessage = null)
@@ -83,14 +93,6 @@ class Api
 
 		$this->setStatus($code);
 		$this->sendResponseData(array('error' => array('code' => $code, 'message' => $message)));
-	}
-
-	public function getControllerName()
-	{
-		$parts = explode('/', $_SERVER['REQUEST_URI']);
-        $controller = strtolower($parts[1]);
-		
-		return $controller;
 	}
 
 	public function getData()
@@ -113,7 +115,7 @@ class Api
 				    $method = 'PUT';
 				    break;
 				default: 
-				    throw new Exception("Unexpected header!");
+				    throw new \Exception("Unexpected header!");
 			}
 		}
 

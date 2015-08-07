@@ -2,8 +2,6 @@
 
 namespace Rest\models;
 
-use \Rest\models\Address;
-
 class AddressRepository
 {
 	private $connection;
