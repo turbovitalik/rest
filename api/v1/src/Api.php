@@ -56,8 +56,7 @@ class Api
 
             switch ($this->method) {
                 case 'GET':
-                    $result = $controller->view($this->param);
-                    $this->sendResponseData($result);
+                    $controller->view($this->param);
                     break;
 
                 case 'POST':
@@ -67,23 +66,19 @@ class Api
                     if ($this->param) {
                         throw new ApiException(400);
                     }
-                    $result = $controller->create($this->data);
-                    $this->setStatus(201);
-                    $this->sendResponseData(array('success' => 1));
+                    $controller->create($this->data);
                     break;
 
                 case 'PUT':
                     if (!$this->data || !$this->param) {
                         throw new ApiException(400, "Data for updating isn't set!");
                     }
-                    $result = $controller->update($this->param, $this->data);
-                    $this->setStatus(200);
-                    $this->sendResponseData(array('success' => 1));
+                    $controller->update($this->param, $this->data);
                     break;
             }
 
         } else {
-            $this->setStatus(404);
+            throw new ApiException(400, "Bad Request!");
         }
 	}
 

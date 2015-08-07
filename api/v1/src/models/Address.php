@@ -2,8 +2,6 @@
 
 namespace Rest\models;
 
-use \Rest\ApiException;
-
 class Address
 {
 	public $id;
@@ -13,6 +11,8 @@ class Address
 	public $postalCode;
 	public $city;
 	public $country;
+
+    private $validateError;
 
     private $_tableFieldsMap = array(
         'ADDRESSID' => 'id',
@@ -68,9 +68,15 @@ class Address
         }
 
         if (count($undefinedAttributes)) {
-            throw new ApiException(400, implode(', ', $undefinedAttributes) . " wasn't set!");
+            $this->validateError = implode(', ', $undefinedAttributes) . " wasn't set!";
+            return false;
         } else {
             return true;
         }
+    }
+
+    public function getValidateError()
+    {
+        return $this->validateError;
     }
 }
