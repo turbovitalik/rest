@@ -4,13 +4,16 @@ namespace Rest\controllers;
 
 use \Rest\models\AddressRepository;
 use \Rest\models\Address;
+use Rest\Utils\Database\Connection;
 use \Rest\views\JsonView;
 
-class AddressesController
+class AddressController
 {
     public function view($id = null)
     {
-        $addressRepository = new AddressRepository();
+        $dbConnection = Connection::getInstance();
+        $addressRepository = new AddressRepository($dbConnection->getConnection());
+
         $view = new JsonView();
 
         if ($id) {
@@ -20,7 +23,6 @@ class AddressesController
                     "error" => "Address with ID $id doesn't exist"
                 ));
             }
-
         } else {
             $result = $addressRepository->findAll();
         }

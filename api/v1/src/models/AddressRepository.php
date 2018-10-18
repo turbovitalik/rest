@@ -6,28 +6,19 @@ class AddressRepository
 {
 	private $connection;
 
-	public function __construct(\PDO $connection = null)
+	private $table = 'address';
+
+	public function __construct(\PDO $connection)
 	{
         $this->connection = $connection;
-        if ($this->connection === null) {
-	    	$this->connection = new \PDO(
-    			'mysql:host=localhost;dbname=api',
-    			'root',
-    			'1'
-    		);
-    		$this->connection->setAttribute(
-    			\PDO::ATTR_ERRMODE,
-    			\PDO::ERRMODE_EXCEPTION
-    		);
-        }
 	}
 
 	public function find($id)
 	{
 		$stmt = $this->connection->prepare('
             select * 
-            from ADDRESS 
-            where ADDRESSID = :id
+            from ' . $this->table . ' 
+            where id = :id
         ');
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -41,7 +32,7 @@ class AddressRepository
     {
         $stmt = $this->connection->prepare('
             select * 
-            from ADDRESS
+            from ' . $this->table . '
         ');
         $stmt->execute();
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
@@ -52,8 +43,8 @@ class AddressRepository
     public function add(Address $address)
     {
         $stmt = $this->connection->prepare('
-            insert into ADDRESS 
-                (LABEL, STREET, HOUSENUMBER, POSTALCODE, CITY, COUNTRY) 
+            insert into ' . $this->table . ' 
+                (label, street, house_number, postal_code, city, country) 
             values 
                 (:label, :street, :houseNumber, :postalCode, :city, :country)
         ');
@@ -70,14 +61,14 @@ class AddressRepository
     public function update(Address $address)
     {
         $stmt = $this->connection->prepare('
-            update ADDRESS
-            set LABEL = :label,
-                STREET = :street,
-                HOUSENUMBER = :houseNumber,
-                POSTALCODE = :postalCode,
-                CITY = :city,
-                COUNTRY = :country
-            where ADDRESSID = :id
+            update ' . $this->table . '
+            set label = :label,
+                street = :street,
+                house_number = :houseNumber,
+                postal_code = :postalCode,
+                city = :city,
+                country = :country
+            where id = :id
         ');
         $stmt->bindParam(':label', $address->label);
         $stmt->bindParam(':street', $address->street);

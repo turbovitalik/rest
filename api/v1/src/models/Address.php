@@ -7,24 +7,24 @@ class Address
 	public $id;
 	public $label;
 	public $street;
-	public $houseNumber;
-	public $postalCode;
+	public $house_number;
+	public $postal_code;
 	public $city;
 	public $country;
 
     private $validateError;
 
     private $_tableFieldsMap = array(
-        'ADDRESSID' => 'id',
-        'LABEL' => 'label',
-        'STREET' => 'street',
-        'HOUSENUMBER' => 'houseNumber',
-        'POSTALCODE' => 'postalCode',
-        'CITY' => 'city',
-        'COUNTRY' => 'country'
+        'id' => 'id',
+        'label' => 'label',
+        'street' => 'street',
+        'house_number' => 'house_number',
+        'postal_code' => 'postal_code',
+        'city' => 'city',
+        'country' => 'country'
     );
 
-    private $_requiredFields = array('label', 'street', 'houseNumber', 'postalCode', 'city', 'country');
+    private $_requiredFields = array('label', 'street', 'house_number', 'postal_code', 'city', 'country');
 
 	public function __construct($data = null)
 	{        
@@ -35,8 +35,8 @@ class Address
 
             $this->label = !empty($data['label']) ? $data['label'] : null;
             $this->street = !empty($data['street']) ? $data['street'] : null;
-            $this->houseNumber = !empty($data['houseNumber']) ? $data['houseNumber'] : null;
-            $this->postalCode = !empty($data['postalCode']) ? $data['postalCode'] : null;
+            $this->houseNumber = !empty($data['house_number']) ? $data['house_number'] : null;
+            $this->postalCode = !empty($data['postal_code']) ? $data['postal_code'] : null;
             $this->city = !empty($data['city']) ? $data['city'] : null;
             $this->country = !empty($data['country']) ? $data['country'] : null;
         }

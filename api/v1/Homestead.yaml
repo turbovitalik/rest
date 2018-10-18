@@ -1,0 +1,20 @@
+ip: 192.168.10.10
+memory: 2048
+cpus: 1
+provider: virtualbox
+authorize: ~/.ssh/id_rsa.pub
+keys:
+    - ~/.ssh/id_rsa
+folders:
+    -
+        map: /Users/turbovitalik/Sites/rest/api/v1
+        to: /home/vagrant/code
+sites:
+    -
+        map: rest.loc
+        to: /home/vagrant/code
+        type: rest
+databases:
+    - rest
+name: v1
+hostname: v1
