@@ -13,7 +13,6 @@ sites:
     -
         map: rest.loc
         to: /home/vagrant/code
-        type: rest
 databases:
     - rest
 name: v1

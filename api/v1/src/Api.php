@@ -2,6 +2,9 @@
 
 namespace Rest;
 
+use Pimple\Container;
+use Rest\Utils\Request;
+
 class Api
 {
 	protected $method;
@@ -19,67 +22,32 @@ class Api
 		'500' => 'Internal Server Error'
 	);
 
+	public function __construct(Container $container)
+    {
+        $this->container = $container;
+    }
+
     public function run()
     {
         try {
-            $this->handle();
+            $request = $this->container['app.request'];
+            $response = $this->handle($request);
+            $response->send();
         } catch (ApiException $e) {
             $this->handleError($e->getCode(), $e->getMessage());
         }
     }
 
-	public function handle()
+    /**
+     * @param Request $request
+     */
+	public function handle(Request $request)
 	{
-        $this->method = $this->getMethod();
-        if ($this->method == 'POST' || $this->method == 'PUT') {
-            $this->data = $this->getData();
-            if (!$this->data) {
-                throw new ApiException(400, "Request body isn't correct");
-            }
-        }
+        $router = $this->container['app.router'];
 
-        $parts = explode('/', $_SERVER['REQUEST_URI']);
-        $controllerName = strtolower($parts[1]);
+        $response = $router->handleRequest($request);
 
-        if (isset($parts[2])) {
-            $this->param = $parts[2];
-
-            // For PHPStorm Test Rest API Tool
-            $this->param = str_replace('?', '', $this->param);
-        }
-
-        $controllerClass = ucfirst($controllerName) . 'Controller';
-
-        if (file_exists(__DIR__ . '/controllers/' . $controllerClass . '.php')) {
-            $controllerClass = '\\Rest\\controllers\\' . $controllerClass;
-            $controller = new $controllerClass;
-
-            switch ($this->method) {
-                case 'GET':
-                    $controller->view($this->param);
-                    break;
-
-                case 'POST':
-                    if (!$this->data) {
-                        throw new ApiException(400, "Data for creating isn't set!");
-                    }
-                    if ($this->param) {
-                        throw new ApiException(400);
-                    }
-                    $controller->create($this->data);
-                    break;
-
-                case 'PUT':
-                    if (!$this->data || !$this->param) {
-                        throw new ApiException(400, "Data for updating isn't set!");
-                    }
-                    $controller->update($this->param, $this->data);
-                    break;
-            }
-
-        } else {
-            throw new ApiException(400, "Bad Request!");
-        }
+        return $response;
 	}
 
 	public function handleError($code, $errorMessage = null)
@@ -96,25 +64,6 @@ class Api
 		$data = json_decode($data, true);
 
 		return $data;
-	}
-
-	public function getMethod()
-	{
-		$method = $_SERVER['REQUEST_METHOD'];
-		if ($method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
-			switch ($_SERVER['HTTP_X_HTTP_METHOD']) {
-				case 'DELETE':
-				    $method = 'DELETE';
-				    break;
-				case 'PUT':
-				    $method = 'PUT';
-				    break;
-				default: 
-				    throw new \Exception("Unexpected header!");
-			}
-		}
-
-		return $method;
 	}
 
 	public function sendResponseData($data)

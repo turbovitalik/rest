@@ -4,12 +4,27 @@ namespace Rest\models;
 
 class Address
 {
-	public $id;
+    /**
+     * @var integer
+     */
+    public $id;
+
+    /** @var string  */
 	public $label;
+
+	/** @var string */
 	public $street;
-	public $house_number;
-	public $postal_code;
+
+	/** @var string */
+	public $houseNumber;
+
+	/** @var string */
+	public $postalCode;
+
+	/** @var string */
 	public $city;
+
+	/** @var string */
 	public $country;
 
     private $validateError;
@@ -78,5 +93,109 @@ class Address
     public function getValidateError()
     {
         return $this->validateError;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStreet()
+    {
+        return $this->street;
+    }
+
+    /**
+     * @param string $street
+     */
+    public function setStreet($street)
+    {
+        $this->street = $street;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHouseNumber()
+    {
+        return $this->houseNumber;
+    }
+
+    /**
+     * @param string $houseNumber
+     */
+    public function setHouseNumber($houseNumber)
+    {
+        $this->houseNumber = $houseNumber;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPostalCode()
+    {
+        return $this->postalCode;
+    }
+
+    /**
+     * @param string $postalCode
+     */
+    public function setPostalCode($postalCode)
+    {
+        $this->postalCode = $postalCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+    /**
+     * @param string $city
+     */
+    public function setCity($city)
+    {
+        $this->city = $city;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @param string $country
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
     }
 }

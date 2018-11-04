@@ -2,41 +2,43 @@
 
 namespace Rest\controllers;
 
-use \Rest\models\AddressRepository;
 use \Rest\models\Address;
-use Rest\Utils\Database\Connection;
+use Rest\Utils\JsonResponse;
+use Rest\Utils\Request;
 use \Rest\views\JsonView;
 
-class AddressController
+class AddressController extends ContainerAwareController
 {
-    public function view($id = null)
+    public function actionGet($id = null)
     {
-        $dbConnection = Connection::getInstance();
-        $addressRepository = new AddressRepository($dbConnection->getConnection());
-
         $view = new JsonView();
 
-        if ($id) {
-            $result = $addressRepository->find($id);
-            if (!$result) {
-                return $view->render(404, array(
-                    "error" => "Address with ID $id doesn't exist"
-                ));
-            }
-        } else {
-            $result = $addressRepository->findAll();
+        $addressRepository = $this->get('app.repository.address');
+
+        if (null === $id) {
+            $addressCollection = $addressRepository->findAll();
+            return $view->renderJson(JsonResponse::HTTP_OK, $addressCollection);
         }
 
-        return $view->render(200, $result);
+        $address = $addressRepository->find($id);
+
+        if (!$address) {
+            return $view->renderResourceNotFound();
+        }
+
+        return $view->renderJson(JsonResponse::HTTP_OK, $address);
     }
 
-    public function create($data)
+    public function actionCreate(Request $request)
     {
-        $address = new Address($data);
+        $jsonData = json_decode($request->getBody());
+
+        $address = new Address($jsonData);
+
+        $addressRepository = $this->get('app.repository.address');
         $view = new JsonView();
 
         if ($address->validate()) {
-            $addressRepository = new AddressRepository();
             $addressRepository->add($address);
             return $view->render(201, array('success' => '1'));
         } else {
@@ -44,10 +46,10 @@ class AddressController
         }
     }
 
-    public function update($id, $data)
+    public function update($id, Request $request)
     {
-        $addressRepository = new AddressRepository();
         $view = new JsonView();
+        $addressRepository = $this->get('app.repository.address');
 
         $address = $addressRepository->find($id);
         if (!$address) {

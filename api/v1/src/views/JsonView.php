@@ -2,6 +2,8 @@
 
 namespace Rest\views;
 
+use Rest\Utils\JsonResponse;
+
 class JsonView
 {
     private $codes = array(
@@ -13,11 +15,20 @@ class JsonView
         '500' => 'Internal Server Error'
     );
 
-    public function render($code, $data)
+    public function renderResourceNotFound()
     {
-        $this->setStatus($code);
-        header('Content-Type: application/json');
-        echo json_encode($data);
+        return $this->renderJson(404, 'Resource not found');
+    }
+
+    public function renderJson($code, $content)
+    {
+        $content = json_encode($content);
+
+        $response = new JsonResponse();
+        $response->setContent($content);
+        $response->setStatus($code);
+
+        return $response;
     }
 
     public function setStatus($code)

@@ -3,7 +3,8 @@
         "laravel/homestead": "^7.18"
     },
     "require": {
-        "vlucas/phpdotenv": "^2.5"
+        "vlucas/phpdotenv": "^2.5",
+        "pimple/pimple": "^3.2"
     },
     "autoload": {
         "psr-4": {

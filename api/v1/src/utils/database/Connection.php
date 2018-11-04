@@ -8,7 +8,7 @@ class Connection
 
     private $connection;
 
-    private function __construct()
+    public function __construct()
     {
         $this->connection = new \PDO(
             'mysql:host=' . getenv('MYSQL_DB_HOST') . ';dbname=' . getenv('MYSQL_DB_NAME'),

@@ -1,8 +1,10 @@
 <?php
 
-namespace Rest\models;
+namespace Rest\Repository;
 
-class AddressRepository
+use Rest\models\Address;
+
+class AddressRepository implements RepositoryInterface
 {
 	private $connection;
 
@@ -15,6 +17,8 @@ class AddressRepository
 
 	public function find($id)
 	{
+	    $id = (int) $id;
+
 		$stmt = $this->connection->prepare('
             select * 
             from ' . $this->table . ' 
