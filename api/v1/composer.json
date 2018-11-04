@@ -1,6 +1,7 @@
 {
     "require-dev": {
-        "laravel/homestead": "^7.18"
+        "laravel/homestead": "^7.18",
+        "phpunit/phpunit": "^7.4"
     },
     "require": {
         "vlucas/phpdotenv": "^2.5",
@@ -8,7 +9,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Rest\\": "src/"
+            "Rest\\": "src/",
+            "Tests\\": "tests/"
         }
     }
 }
