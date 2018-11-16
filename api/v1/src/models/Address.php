@@ -3,7 +3,6 @@
 namespace Rest\models;
 
 use PHPUnit\Runner\Exception;
-use Rest\Utils\Request;
 
 class Address
 {
@@ -35,17 +34,6 @@ class Address
 
     private $updated = [];
 
-    private $_tableFieldsMap = array(
-        'id' => 'id',
-        'label' => 'label',
-        'street' => 'street',
-        'house_number' => 'house_number',
-        'postal_code' => 'postal_code',
-        'city' => 'city',
-        'country' => 'country',
-        'comments' => 'comments',
-    );
-
     private $requiredFields = array('label', 'street', 'house_number', 'postal_code', 'city', 'country');
 
     /**
@@ -56,8 +44,9 @@ class Address
     {
         foreach ($attributes as $key => $value) {
             $method = 'set' . ucfirst(strtolower($key));
-            if (method_exists($this, $method))
+            if (method_exists($this, $method)) {
                 $this->{$method}($value);
+            }
         }
     }
 

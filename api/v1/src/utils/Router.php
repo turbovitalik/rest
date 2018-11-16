@@ -59,9 +59,6 @@ class Router
                 break;
 
             case 'POST':
-//                if (!$requestData) {
-//                    throw new ApiException(400, "Data for creating isn't set!");
-//                }
                 if ($idParam) {
                     throw new ApiException(400);
                 }

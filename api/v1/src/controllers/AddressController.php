@@ -41,7 +41,8 @@ class AddressController extends JsonController
             return $this->view->renderJson(JsonResponse::HTTP_OK, $address);
         }
 
-        return $this->view->renderJson(JsonResponse::HTTP_BAD_REQUEST, $e->getMessage());
+        //TODO: check it
+        return $this->view->renderJson(JsonResponse::HTTP_BAD_REQUEST, "Bad Request");
     }
 
     public function actionUpdate($id, Request $request)

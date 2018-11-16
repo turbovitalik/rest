@@ -72,7 +72,8 @@ class JsonResponse
     private function resolveStatusText()
     {
         if (null !== $this->statusCode) {
-            $this->statusText = array_key_exists($this->statusCode, $this->statusTextMap) ? $this->statusTextMap[$this->statusCode] : '';
+            $this->statusText = array_key_exists($this->statusCode, $this->statusTextMap) ?
+                $this->statusTextMap[$this->statusCode] : '';
         }
     }
 

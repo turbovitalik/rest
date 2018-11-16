@@ -6,14 +6,6 @@ use Rest\models\Address;
 
 class AddressManager
 {
-    /**
-     * @param $data array
-     */
-    public function createFromArray($data)
-    {
-
-    }
-
     public function create($attributes)
     {
         foreach ($attributes as $key => $value) {

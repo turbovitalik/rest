@@ -40,7 +40,7 @@ class AddressMapper
         if ($criteria) {
             $whereSql = "";
 
-            array_walk($criteria, function($value, $key) use (&$whereSql, &$bindParams) {
+            array_walk($criteria, function ($value, $key) use (&$whereSql, &$bindParams) {
                 $wherePart = "$key=:$key";
                 $whereSql .= strlen($whereSql) ? " and " : "";
                 $whereSql .= $wherePart;
@@ -109,7 +109,7 @@ class AddressMapper
     private function getQuerySetString($attributes)
     {
         $queryStr = '';
-        array_walk($attributes, function($item, $key) use (&$queryStr) {
+        array_walk($attributes, function ($item, $key) use (&$queryStr) {
             $bind = ':' . $key;
             $queryStr .= strlen($queryStr) ? ',' : '';
             $queryStr .= $key . '=' . $bind;
@@ -135,7 +135,7 @@ class AddressMapper
     {
         $camelCase = new CamelCaseHelper();
 
-        return array_filter($fields, function($key) use ($keysOfChanged, $camelCase) {
+        return array_filter($fields, function ($key) use ($keysOfChanged, $camelCase) {
             return in_array($camelCase($key), $keysOfChanged);
         }, ARRAY_FILTER_USE_KEY);
     }

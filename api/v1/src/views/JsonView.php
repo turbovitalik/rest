@@ -37,5 +37,4 @@ class JsonView
         $code .= ' ' . $this->codes[strval($code)];
         header("$protocol $code");
     }
-
 }
