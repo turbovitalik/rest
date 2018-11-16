@@ -3,6 +3,7 @@
 namespace Rest;
 
 use Pimple\Container;
+use Rest\Utils\JsonResponse;
 use Rest\Utils\Request;
 
 class Api
@@ -32,10 +33,13 @@ class Api
         try {
             $request = $this->container['app.request'];
             $response = $this->handle($request);
-            $response->send();
-        } catch (ApiException $e) {
-            $this->handleError($e->getCode(), $e->getMessage());
+        } catch (\Exception $e) {
+            $response = new JsonResponse();
+            $response->setContent($e->getMessage());
+            $response->setStatus(JsonResponse::HTTP_BAD_REQUEST);
         }
+
+        $response->send();
     }
 
     /**

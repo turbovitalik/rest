@@ -3,84 +3,50 @@
 namespace Rest\Repository;
 
 use Rest\models\Address;
+use Rest\models\AddressMapper;
 
-class AddressRepository implements RepositoryInterface
+class AddressRepository
 {
-	private $connection;
+    /**
+     * @var AddressMapper
+     */
+    private $mapper;
 
-	private $table = 'address';
-
-	public function __construct(\PDO $connection)
+    /**
+     * AddressRepository constructor.
+     * @param AddressMapper $mapper
+     */
+	public function __construct(AddressMapper $mapper)
 	{
-        $this->connection = $connection;
+	    $this->mapper = $mapper;
 	}
 
+    /**
+     * @param $id
+     * @return Address
+     */
 	public function find($id)
 	{
-	    $id = (int) $id;
+	    $results = $this->mapper->select(['id' => (int) $id]);
 
-		$stmt = $this->connection->prepare('
-            select * 
-            from ' . $this->table . ' 
-            where id = :id
-        ');
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        
-        $stmt->setFetchMode(\PDO::FETCH_CLASS, '\Rest\models\Address');
-        
-        return $stmt->fetch(); 
+	    return $results[0];
 	}
 
+    /**
+     * @return array
+     */
 	public function findAll()
     {
-        $stmt = $this->connection->prepare('
-            select * 
-            from ' . $this->table . '
-        ');
-        $stmt->execute();
-        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-        
-        return $stmt->fetchAll();
+        return $this->mapper->select();
     }
 
-    public function add(Address $address)
+    public function save(Address $address)
     {
-        $stmt = $this->connection->prepare('
-            insert into ' . $this->table . ' 
-                (label, street, house_number, postal_code, city, country) 
-            values 
-                (:label, :street, :houseNumber, :postalCode, :city, :country)
-        ');
-        $stmt->bindParam(':label', $address->label);
-        $stmt->bindParam(':street', $address->street);
-        $stmt->bindParam(':houseNumber', $address->houseNumber);
-        $stmt->bindParam(':postalCode', $address->postalCode);
-        $stmt->bindParam(':city', $address->city);
-        $stmt->bindParam(':country', $address->country);
-
-        return $stmt->execute();
+        $id = $address->getId();
+        if (!$id) {
+            $this->mapper->insert($address);
+        } else {
+            $this->mapper->update($id, $address);
+        }
     }
-
-    public function update(Address $address)
-    {
-        $stmt = $this->connection->prepare('
-            update ' . $this->table . '
-            set label = :label,
-                street = :street,
-                house_number = :houseNumber,
-                postal_code = :postalCode,
-                city = :city,
-                country = :country
-            where id = :id
-        ');
-        $stmt->bindParam(':label', $address->label);
-        $stmt->bindParam(':street', $address->street);
-        $stmt->bindParam(':houseNumber', $address->houseNumber);
-        $stmt->bindParam(':postalCode', $address->postalCode);
-        $stmt->bindParam(':city', $address->city);
-        $stmt->bindParam(':country', $address->country);
-        $stmt->bindParam(':id', $address->id);
-        return $stmt->execute();
-    } 
 }

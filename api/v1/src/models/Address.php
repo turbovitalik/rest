@@ -2,32 +2,38 @@
 
 namespace Rest\models;
 
+use PHPUnit\Runner\Exception;
+use Rest\Utils\Request;
+
 class Address
 {
-    /**
-     * @var integer
-     */
+    /** @var integer */
     public $id;
 
-    /** @var string  */
-	public $label;
+    /** @var string */
+    public $label;
 
-	/** @var string */
-	public $street;
+    /** @var string */
+    public $street;
 
-	/** @var string */
-	public $houseNumber;
+    /** @var string */
+    public $houseNumber;
 
-	/** @var string */
-	public $postalCode;
+    /** @var string */
+    public $postalCode;
 
-	/** @var string */
-	public $city;
+    /** @var string */
+    public $city;
 
-	/** @var string */
-	public $country;
+    /** @var string */
+    public $country;
 
-    private $validateError;
+    /** @var string */
+    public $comments;
+
+    private $validationError = '';
+
+    private $updated = [];
 
     private $_tableFieldsMap = array(
         'id' => 'id',
@@ -36,63 +42,84 @@ class Address
         'house_number' => 'house_number',
         'postal_code' => 'postal_code',
         'city' => 'city',
-        'country' => 'country'
+        'country' => 'country',
+        'comments' => 'comments',
     );
 
-    private $_requiredFields = array('label', 'street', 'house_number', 'postal_code', 'city', 'country');
+    private $requiredFields = array('label', 'street', 'house_number', 'postal_code', 'city', 'country');
 
-	public function __construct($data = null)
-	{        
-        if (is_array($data)) {
-            if (isset($data['id'])) {
-            	$this->id = $data['id'];
-            } 
-
-            $this->label = !empty($data['label']) ? $data['label'] : null;
-            $this->street = !empty($data['street']) ? $data['street'] : null;
-            $this->houseNumber = !empty($data['house_number']) ? $data['house_number'] : null;
-            $this->postalCode = !empty($data['postal_code']) ? $data['postal_code'] : null;
-            $this->city = !empty($data['city']) ? $data['city'] : null;
-            $this->country = !empty($data['country']) ? $data['country'] : null;
-        }
-	}
-
-    public function __set($name, $value)
+    /**
+     * Address constructor.
+     * @param array $attributes
+     */
+    public function __construct($attributes = [])
     {
-        if (!array_key_exists($name, $this->_tableFieldsMap)) {
-            $this->{$name} = $value;
-        } else {
-            $this->{$this->_tableFieldsMap[$name]} = $value;
+        foreach ($attributes as $key => $value) {
+            $method = 'set' . ucfirst(strtolower($key));
+            if (method_exists($this, $method))
+                $this->{$method}($value);
         }
     }
 
-    public function setAttributes($data)
+    public function __set($name, $value)
     {
-        foreach ($data as $key => $value) {
-            $this->{$key} = $value;
+        $method = 'set' . ucfirst($this->nameCamelCase($name));
+        if (method_exists($this, $method)) {
+            $this->{$method}($value);
+        } elseif (property_exists($this, $name)) {
+            $this->{$name} = $value;
+        } else {
+            throw new Exception("Property '$name' does not exist");
         }
+    }
+
+    public function __get($name)
+    {
+        $name = $this->nameCamelCase($name);
+        if (property_exists($this, $name)) {
+            return $this->{$name};
+        }
+    }
+
+    // TODO: move to anotherPlace
+    public function nameCamelCase($name)
+    {
+        $parts = explode('_', $name);
+
+        $i = 0;
+        $camelCased = array_reduce($parts, function ($carry, $item) use (&$i) {
+            $item = $i > 0 ? ucfirst($item) : $item;
+            $i++;
+            return $carry . $item;
+        }, '');
+
+        return $camelCased;
     }
 
     public function validate()
     {
-        $undefinedAttributes = array();
-        foreach ($this->_requiredFields as $fieldName) {
-            if ($this->{$fieldName} === null) {
-                $undefinedAttributes[] = $fieldName;
+        foreach ($this->requiredFields as $key) {
+            if (!$this->{$key}) {
+                $this->validationError = "Required property '$key' can not be empty";
             }
-        }
-
-        if (count($undefinedAttributes)) {
-            $this->validateError = implode(', ', $undefinedAttributes) . " wasn't set!";
-            return false;
-        } else {
-            return true;
         }
     }
 
-    public function getValidateError()
+    /**
+     * return bool
+     */
+    public function isValid()
     {
-        return $this->validateError;
+        $this->validate();
+        return !(bool) $this->getValidationError();
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidationError()
+    {
+        return $this->validationError;
     }
 
     /**
@@ -101,6 +128,14 @@ class Address
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
     }
 
     /**
@@ -197,5 +232,37 @@ class Address
     public function setCountry($country)
     {
         $this->country = $country;
+    }
+
+    /**
+     * @return string
+     */
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    /**
+     * @param $comments
+     */
+    public function setComments($comments)
+    {
+        $this->comments = $comments;
+    }
+
+    public function populateWith($data)
+    {
+        foreach ($data as $key => $value) {
+            $this->updated[] = $key;
+            $this->__set($key, $value);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getUpdatedKeys()
+    {
+        return $this->updated;
     }
 }

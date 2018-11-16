@@ -14,8 +14,21 @@ $container['app.database.connection'] = function ($c) {
     return new \Rest\Utils\Database\Connection();
 };
 
+$container['app.mapper.address'] = function ($c) {
+    return new \Rest\models\AddressMapper(
+        $c['app.database.connection'],
+        new \Rest\Helpers\CamelCaseHelper()
+    );
+};
+
 $container['app.repository.address'] = function ($c) {
-    return new \Rest\Repository\AddressRepository($c['app.database.connection']->getConnection());
+    return new \Rest\Repository\AddressRepository(
+        $c['app.mapper.address']
+    );
+};
+
+$container['app.manager.address'] = function ($c) {
+    return new \Rest\Utils\AddressManager();
 };
 
 $container['app.router'] = function ($c) {

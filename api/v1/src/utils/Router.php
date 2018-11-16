@@ -4,6 +4,8 @@ namespace Rest\Utils;
 
 use Rest\ApiException;
 use Rest\Controllers\ContainerAwareController;
+use Rest\Controllers\JsonController;
+use Rest\views\JsonView;
 
 class Router
 {
@@ -41,10 +43,14 @@ class Router
             throw new ApiException(404, "Resource not found");
         }
 
+        //TODO: do this based on content-type headers
+        $view = new JsonView();
+
         $controller = new $controllerClass();
 
-        if ($controller instanceof ContainerAwareController) {
+        if ($controller instanceof JsonController) {
             $controller->setContainer($this->container);
+            $controller->setView($view);
         }
 
         switch ($request->getMethod()) {
@@ -59,6 +65,9 @@ class Router
                 if ($idParam) {
                     throw new ApiException(400);
                 }
+
+                $request = new RequestMock();
+
                 $response = $controller->actionCreate($request);
                 break;
 
@@ -66,15 +75,12 @@ class Router
                 if (!$requestData || !$idParam) {
                     throw new ApiException(400, "Data for updating isn't set!");
                 }
-                $response = $controller->update($idParam, $request);
+
+                $request = new RequestMock();
+                $response = $controller->actionUpdate($idParam, $request);
                 break;
         }
 
         return $response;
-    }
-
-    public function runAction($controller, $method)
-    {
-
     }
 }

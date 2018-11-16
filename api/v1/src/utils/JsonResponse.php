@@ -8,11 +8,13 @@ class JsonResponse
     const HTTP_CREATED = 201;
     const HTTP_BAD_REQUEST = 400;
     const HTTP_NOT_FOUND = 404;
+    const HTTP_SERVER_ERROR = 500;
 
     const STATUS_OK = 'OK';
     const STATUS_CREATED = 'Created';
     const STATUS_BAD_REQUEST = 'Bad Request';
     const STATUS_NOT_FOUND = 'Not Found';
+    const STATUS_SERVER_ERROR = 'Internal Server Error';
 
     /**
      * @var null|string
@@ -37,6 +39,7 @@ class JsonResponse
         self::HTTP_CREATED => self::STATUS_CREATED,
         self::HTTP_BAD_REQUEST => self::STATUS_BAD_REQUEST,
         self::HTTP_NOT_FOUND => self::STATUS_NOT_FOUND,
+        self::HTTP_SERVER_ERROR => self::STATUS_SERVER_ERROR,
     ];
 
     /**

@@ -2,63 +2,67 @@
 
 namespace Rest\controllers;
 
-use \Rest\models\Address;
+use Rest\models\Address;
+use Rest\Repository\AddressRepository;
 use Rest\Utils\JsonResponse;
 use Rest\Utils\Request;
-use \Rest\views\JsonView;
 
-class AddressController extends ContainerAwareController
+class AddressController extends JsonController
 {
     public function actionGet($id = null)
     {
-        $view = new JsonView();
-
         $addressRepository = $this->get('app.repository.address');
 
         if (null === $id) {
             $addressCollection = $addressRepository->findAll();
-            return $view->renderJson(JsonResponse::HTTP_OK, $addressCollection);
+            return $this->view->renderJson(JsonResponse::HTTP_OK, $addressCollection);
         }
 
         $address = $addressRepository->find($id);
 
         if (!$address) {
-            return $view->renderResourceNotFound();
+            return $this->view->renderResourceNotFound();
         }
 
-        return $view->renderJson(JsonResponse::HTTP_OK, $address);
+        return $this->view->renderJson(JsonResponse::HTTP_OK, $address);
     }
 
     public function actionCreate(Request $request)
     {
-        $jsonData = json_decode($request->getBody());
+        $data = $request->getBody();
 
-        $address = new Address($jsonData);
-
+        /** @var AddressRepository $addressRepository */
         $addressRepository = $this->get('app.repository.address');
-        $view = new JsonView();
 
-        if ($address->validate()) {
-            $addressRepository->add($address);
-            return $view->render(201, array('success' => '1'));
-        } else {
-            return $view->render(400, array('error' => $address->getValidateError()));
+        $address = new Address($data);
+
+        if ($address->isValid()) {
+            $addressRepository->save($address);
+            return $this->view->renderJson(JsonResponse::HTTP_OK, $address);
         }
+
+        return $this->view->renderJson(JsonResponse::HTTP_BAD_REQUEST, $e->getMessage());
     }
 
-    public function update($id, Request $request)
+    public function actionUpdate($id, Request $request)
     {
-        $view = new JsonView();
+        $data = $request->getBody();
+
         $addressRepository = $this->get('app.repository.address');
 
         $address = $addressRepository->find($id);
+
         if (!$address) {
-            return $view->render(400, "Adress with ID $id doesn't exist");
+            return $this->view->renderResourceNotFound();
         }
 
-        $address->setAttributes($data);
-        $addressRepository->update($address);
+        try {
+            $address->populateWith($data);
+            $addressRepository->save($address);
+        } catch (\Exception $e) {
+            return $this->view->renderJson(JsonResponse::HTTP_BAD_REQUEST, $e->getMessage());
+        }
 
-        return $view->render(200, array("success" => "1"));
+        return $this->view->renderJson(JsonResponse::HTTP_OK, $address);
     }
 }

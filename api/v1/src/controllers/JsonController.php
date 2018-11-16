@@ -3,13 +3,19 @@
 namespace Rest\Controllers;
 
 use Pimple\Container;
+use Rest\views\JsonView;
 
-class ContainerAwareController
+class JsonController
 {
     /**
      * @var Container
      */
     protected $container;
+
+    /**
+     * @var JsonView
+     */
+    protected $view;
 
     /**
      * @param $serviceId string
@@ -26,5 +32,13 @@ class ContainerAwareController
     public function setContainer(Container $container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * @param JsonView $view
+     */
+    public function setView(JsonView $view)
+    {
+        $this->view = $view;
     }
 }
